@@ -88,11 +88,6 @@ func (s *MessageSvcImpl) PostMessage(
 
 	log.Info().Msgf("[MessageSvc][PostMessage] finish processing all message with arg: %v", args)
 
-	// _, err = s.MessageRepo.Create(ctx, args)
-	// if err != nil {
-	// 	return err
-	// }
-
 	return nil
 }
 
@@ -112,6 +107,7 @@ func (s *MessageSvcImpl) ProcessMessage(
 		"response_message": responseMessage,
 	}
 
+	// Using go routine to make multithread processing
 	go func() {
 		err = s.storeConsumedMessageAsJSON(ctx, args.TriggerBy, data)
 		if err != nil {

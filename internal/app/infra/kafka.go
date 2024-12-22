@@ -1,8 +1,6 @@
 package infra
 
 import (
-	"fmt"
-
 	"github.com/rs/zerolog/log"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -44,47 +42,4 @@ func NewProducer(cfg *KafkaCfg) *kafka.Producer {
 	}
 
 	return p
-}
-
-// Example producer connection check
-func CheckProducerConnection(cfg *KafkaCfg) error {
-	// Initialize Kafka producer
-	p, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": cfg.BrokerAddress,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create producer: %w", err)
-	}
-	defer p.Close()
-
-	testTopic := "test"
-	// Produce a dummy message to check connection
-	dummyMessage := &kafka.Message{
-		TopicPartition: kafka.TopicPartition{
-			Topic:     &testTopic, // Specify a test topic
-			Partition: kafka.PartitionAny,
-		},
-		Value: []byte("test"), // Test message content
-	}
-
-	// Attempt to send the message and wait for the result
-	deliveryChan := make(chan kafka.Event)
-	err = p.Produce(dummyMessage, deliveryChan)
-	if err != nil {
-		return fmt.Errorf("failed to send test message: %w", err)
-	}
-
-	// Wait for the delivery report
-	select {
-	case event := <-deliveryChan:
-		switch e := event.(type) {
-		case *kafka.Message:
-			if e.TopicPartition.Error != nil {
-				return fmt.Errorf("message delivery failed: %w", e.TopicPartition.Error)
-			}
-		}
-	}
-
-	// If no errors occurred, the connection is good
-	return nil
 }

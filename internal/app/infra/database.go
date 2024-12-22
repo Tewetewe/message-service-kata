@@ -46,6 +46,7 @@ func NewDatabases(cfgs DatabaseCfgs) Databases {
 	}
 }
 
+// Open connection to postgre
 func OpenPostgres(p *DatabaseCfg) *sql.DB {
 	conn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
@@ -62,26 +63,6 @@ func OpenPostgres(p *DatabaseCfg) *sql.DB {
 	db.SetConnMaxLifetime(p.ConnMaxLifetime)
 	db.SetMaxIdleConns(p.MaxIdleConns)
 	db.SetMaxOpenConns(p.MaxOpenConns)
-
-	// Test the connection to ensure it is valid.
-	if err = db.Ping(); err != nil {
-		log.Fatal().Err(err).Msg("postgres: ping")
-	}
-
-	return db
-}
-
-func CheckDatabaseConnection(p *DatabaseCfg) *sql.DB {
-	conn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		p.DBUser, url.QueryEscape(p.DBPass), p.Host, p.Port, p.DBName,
-	)
-
-	// Open a new connection to PostgreSQL using the standard database/sql interface.
-	db, err := sql.Open("postgres", conn)
-	if err != nil {
-		log.Fatal().Err(err).Msg("postgres: open")
-	}
 
 	// Test the connection to ensure it is valid.
 	if err = db.Ping(); err != nil {
